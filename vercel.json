@@ -6,10 +6,6 @@
       "use": "@vercel/next"
     }
   ],
-  "env": {
-    "MIDTRANS_SERVER_KEY": "@midtrans_server_key",
-    "MIDTRANS_CLIENT_KEY": "@midtrans_client_key"
-  },
   "headers": [
     {
       "source": "/api/(.*)",

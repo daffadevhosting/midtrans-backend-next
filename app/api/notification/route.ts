@@ -1,22 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import midtransClient from 'midtrans-client'
-import Cors from 'cors'
-
-const cors = Cors({
-  methods: ['POST', 'OPTIONS'],
-  origin: '*'
-})
-
-function runMiddleware(req: NextRequest, res: NextResponse, fn: any) {
-  return new Promise((resolve, reject) => {
-    fn(req, res, (result: any) => {
-      if (result instanceof Error) {
-        return reject(result)
-      }
-      return resolve(result)
-    })
-  })
-}
 
 // Initialize CoreAPI client for handling notifications
 const coreApi = new midtransClient.CoreApi({
@@ -27,9 +10,6 @@ const coreApi = new midtransClient.CoreApi({
 
 export async function POST(request: NextRequest) {
   try {
-    const response = NextResponse.next()
-    await runMiddleware(request, response, cors)
-    
     const body = await request.json()
     
     // Verify the notification using Midtrans
@@ -64,32 +44,36 @@ export async function POST(request: NextRequest) {
       console.log(`Payment for order ${orderId} is pending`)
     }
 
-    return NextResponse.json({ 
-      success: true,
-      received: true,
-      orderId,
-      status: transactionStatus 
-    }, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Content-Type': 'application/json',
+    return new Response(
+      JSON.stringify({ 
+        success: true,
+        received: true,
+        orderId,
+        status: transactionStatus 
+      }),
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        }
       }
-    })
+    )
   } catch (error: any) {
     console.error('Error handling notification:', error)
-    return NextResponse.json(
-      { 
+    return new Response(
+      JSON.stringify({ 
         success: false,
         error: 'Failed to process notification', 
         details: error.message 
-      },
-      { 
+      }),
+      {
         status: 500,
         headers: {
+          'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'POST, OPTIONS',
-          'Content-Type': 'application/json',
         }
       }
     )
@@ -97,12 +81,16 @@ export async function POST(request: NextRequest) {
 }
 
 export async function OPTIONS() {
-  return NextResponse.json({}, {
-    status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  return new Response(
+    JSON.stringify({}),
+    {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      }
     }
-  })
+  )
 }

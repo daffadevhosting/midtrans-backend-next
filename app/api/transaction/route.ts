@@ -8,6 +8,8 @@ const snap = new midtransClient.Snap({
   clientKey: process.env.MIDTRANS_CLIENT_KEY || '',
 })
 
+const yourUrl = 'https://your-domain.vercel.app/thank-you';
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -60,6 +62,7 @@ export async function POST(request: NextRequest) {
         success: true,
         token: transaction.token,
         redirect_url: transaction.redirect_url,
+        thank_you_url: `${yourUrl}?order_id=${orderId}`
       }),
       {
         status: 200,
